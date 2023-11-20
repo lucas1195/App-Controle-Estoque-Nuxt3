@@ -148,7 +148,7 @@ const save = async () => {
 };
 
 const deleteProduto = async (item: any) => {
-  await axios.get(`https://localhost:7011/Produto/${item.id}`);
+  await axios.delete(`https://localhost:7011/Produto/${item.id}`);
 };
 
 const editProduto = (item: any) => {
