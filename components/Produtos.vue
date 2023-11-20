@@ -83,8 +83,21 @@
     <v-data-table :headers="headers" :items="produtos">
       <template v-slot:item.acoes="{ item, index }">
         <div>
-          <v-btn @click.prevent="deleteProduto(item)">Excluir</v-btn>
-          <v-btn @click.prevent="editProduto(item)">Editar</v-btn>
+          <v-btn
+            color="error"
+            variant="outlined"
+            class="mr-2"
+            density="comfortable"
+            @click.prevent="deleteProduto(item)"
+            >Excluir</v-btn
+          >
+          <v-btn
+            color="success"
+            variant="outlined"
+            density="comfortable"
+            @click.prevent="editProduto(item)"
+            >Editar</v-btn
+          >
         </div>
       </template>
       <template v-slot:item.preco="{ item, index }">
@@ -104,24 +117,19 @@
 <script setup lang="ts">
 import axios from "axios";
 import { onMounted, ref } from "vue";
+import Produto from "~/types/produto";
 const headers = [
   { title: "Nome", key: "nome" },
   { title: "Descrição", key: "descricao" },
   { title: "Preço", key: "preco", type: "number" },
   { title: "Quantidade", key: "quantidade" },
   { title: "Categoria", key: "idCategoria" },
-  { title: "Ações", key: "acoes" },
+  { title: "Ações", align: "center", key: "acoes" },
 ];
 
 const produtos = ref([]);
 const produtoSelecionadoIndex = ref(null);
-const produtoModel = ref({
-  nome: "",
-  descricao: "",
-  preco: "",
-  quantidade: "",
-  idCategoria: "",
-});
+const produtoModel = ref<Produto>(new Produto());
 const categorias = ref([]);
 
 const save = async () => {
@@ -132,9 +140,7 @@ const save = async () => {
     );
 
     if (response.status === 200) {
-      reset();
-    } else {
-      throw new Error("Erro ao salvar o Produto.");
+      await getProdutos();
     }
   } catch {
     alert("Erro ao salvar o Produto.");
@@ -167,13 +173,7 @@ const updateProduto = async () => {
 };
 
 const reset = () => {
-  produtoModel.value = {
-    nome: "",
-    descricao: "",
-    preco: "",
-    quantidade: "",
-    idCategoria: "",
-  };
+  produtoModel.value = new Produto();
 };
 
 const getCategoriaById = (item: any): string => {
@@ -190,14 +190,21 @@ const getCategoriaById = (item: any): string => {
       return "SSD";
     case 7:
       return "Placa de Vídeo";
+    case 8:
+      return "Fontes";
     default:
       return "Categoria Desconhecida";
   }
 };
 
-onMounted(async () => {
+const getProdutos = async () => {
   const responseGet = await axios.get("https://localhost:7011/Produto");
   produtos.value = responseGet.data;
+};
+
+onMounted(async () => {
+  await getProdutos();
+
   const responseGetCategorias = await axios.get(
     "https://localhost:7011/Categoria"
   );
